@@ -1,14 +1,22 @@
-# GebaerdenLernen
+# Gebärden Lernen
 Entwicklung einer interaktiven Webanwendung zum Erlernen von Gebärdensprache, bei der Nutzer Gebärden nachahmen, durch maschinelles Lernen analysiert werden und direktes Feedback erhalten.
 
-Ein Projekt für das Modul Mensch-Machine Interaktion
+Ein Projekt für das Modul Mensch-Maschine-Interaktion.
 ## Bearbeiter:
-Oleksandra Bitrikowa
-Jennifer Vindimut
-Ekaterina Swoboda
+- Oleksandra Bitrikowa  
+- Jennifer Vindimut  
+- Ekaterina Swoboda  
 
 ## AMITUDE-Modell
+**Application**  -  Webanwendung zum Lernen  
+**Modalities**  - Gestenerkennung über die Laptop-Kamera  
+**Interaction**  - Erlernen von Gebärdem mit direktem Feedback  
+**Task**  - Erlernen von der Gebärdsprache  
+**User**  - Nicht-Gebärdsprachler  
+**Devices**  - Laptop mit Kamera  
+**Environment**  - überall mit dem Laptop mit Netzverbindung  
 
+Mit einer Webanwendung **(A)**, die Gestenerkennung über die Laptop-Kamera **(M)** nutzt, können nicht-Gebärdensprachler **(U)** überall mit einem Laptop **(D)** und Netzverbindung **(E)**  Gebärdensprache erlernen, indem sie Gesten nachahmen und direktes Feedback erhalten **(I)(T)**.
 
 ## CROW-Framework
 
