@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.js"></script>
+      <script src="https://unpkg.com/ml5@1/dist/ml5.js"></script>
+  <title>Gebärdensprache Lektionen</title>
+<link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+  
+</head>
+
+<body>
+  <div id="menu">
+
+    <button id="lektion1-button" class="menu-button" onclick="startLektion1()">Start Lektion 1</button>
+
+    <button id="lektion2-button" class="menu-button" onclick="startLektion2()">Lektion 2 starten</button>
+  </div>
+  <div id="lesson-controls" style="display: none;">
+    <button id="next-button" class="lesson-button" disabled onclick="nextGesture()"> Nächstes Wort</button>
+    <button id="close-button" class="lesson-button"onclick="closeLesson()">Lektion schließen</button>
+  </div>
+  <script src="asl.js"></script>
+</body>
+
+</html>
