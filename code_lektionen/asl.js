@@ -1,12 +1,9 @@
-// let filenames1 = ['a.jpg', 'b.jpg','k.jpg','l.png','boy.png', 'girl.gif', 'meet.png', 'deaf.gif', 'help.webp','name.jpg', 'i_me.jpeg','no.gif', 'please.webp']; //'this' picture fehlt noch
-// let filenames2 = ['d.jpg', 'f.jpg','g.gif','i.jpg', 'name.jpg', 'need.gif', 'nice.webp', 'sorry.webp', 'thank_you.jpg', 'yes.jpg']; //'hearing.', 'how.', 'know.',
-
 let video;
 let lektion1;
 let lektion2;
 let label = "waiting...";
-let images1 = [];
-let images2 = [];
+let media1 = [];
+let media2 = [];
 let labels1 = [];
 let labels2 = [];
 let currentIndex = 0;
@@ -18,22 +15,68 @@ function preload() {
   lektion1 = ml5.imageClassifier('https://teachablemachine.withgoogle.com/models/72sxPva99/', { flipped: true ,noCache: true});
   lektion2 = ml5.imageClassifier('https://teachablemachine.withgoogle.com/models/lqng1X_Ep/', { flipped: true ,noCache: true});
   // handPose = ml5.handPose({ flipped: true });
-  console.log('lektionen loaded');
 
-  let filenames1 = ['a.jpg', 'b.jpg', 'k.jpg', 'l (L).png', 'boy.png', 'girl.gif', 'meet.png', 'deaf.gif', 'help.webp', 'name.jpg', 'i me.jpeg', 'no.gif', 'please.webp'];
-  for (let i = 0; i < filenames1.length; i++) {
-    images1.push(loadImage(`images/${filenames1[i]}`));
-    labels1.push(filenames1[i].split('.')[0]);
-     console.log(`Loaded ${filenames1[i]}`); // Log each image filename
+  let filenames1 = [
+    { type: "image", path: "a.jpg" },
+    { type: "image", path: "b.jpg" },
+    { type: "image", path: "k.jpg" },
+    { type: "image", path: "l (L).png" },
+    { type: "video", path: "boy.mp4" },
+    { type: "video", path: "girl.mp4" },
+    { type: "video", path: "meet.mp4" },
+    { type: "video", path: "deaf.mp4" },
+    { type: "video", path: "help.mp4" },
+    { type: "video", path: "i me.mp4" },
+    { type: "video", path: "no.mp4" },
+    { type: "video", path: "please.mp4" },
+    { type: "video", path: "this.mp4" }
+  ];
+
+  for (let file of filenames1) {
+    if (file.type === "image") {
+      let img = loadImage(`media/${file.path}`);
+      media1.push({ type: "image", media: img });
+    } else if (file.type === "video") {
+      let vid = createVideo(`media/${file.path}`);
+      vid.hide();
+      media1.push({ type: "video", media: vid });
+    }
+    labels1.push(file.path.split('.')[0]); 
   }
 
-  let filenames2 = ['d.jpg', 'f.jpg', 'g.gif', 'i.jpg', 'name.jpg', 'need.gif', 'nice.webp', 'sorry.webp', 'thank you.jpg', 'yes.jpg'];
-  for (let i = 0; i < filenames2.length; i++) {
-    images2.push(loadImage(`images/${filenames2[i]}`));
-    labels2.push(filenames2[i].split('.')[0]);
-     console.log(`Loaded ${filenames1[i]}`); // Log each image filename
+ 
+  let filenames2 = [
+    { type: "image", path: "d.jpg" },
+    { type: "image", path: "f.jpg" },
+    { type: "image", path: "g.jpg" },
+    { type: "image", path: "i.jpg" },
+    { type: "video", path: "hearing.mp4" },
+    { type: "video", path: "name.mp4" },
+    { type: "video", path: "nice.mp4" },
+    { type: "video", path: "need.mp4" },
+    { type: "video", path: "sorry.mp4" },
+    { type: "video", path: "thank you.mp4" },
+    { type: "video", path: "yes.mp4" },
+    { type: "video", path: "hearing.mp4" },
+    { type: "video", path: "how.mp4" },
+    { type: "video", path: "know.mp4" }
+  ];
+  
+  for (let file of filenames2) {
+    if (file.type === "image") {
+      let img = loadImage(`media/${file.path}`);
+      media2.push({ type: "image", media: img });
+    } else if (file.type === "video") {
+      let vid = createVideo(`media/${file.path}`);
+      vid.hide();
+      media2.push({ type: "video", media: vid });
+    }
+    labels2.push(file.path.split('.')[0]); 
   }
+
 }
+
+//eventuell ab hier alle console.logs wegmachen, nur zum debuggen da 
 
 function setup() {
   createCanvas(800, 500);
@@ -81,19 +124,17 @@ function startLektion1() {
   label = "waiting...";
   toggleMenu(false);
   toggleLessonControls(true);
-  //drawState();
 }
 
 function startLektion2() {
   console.log("Starting Lektion 2");
  
   state = "lektion2";
-     console.log("State updated to:", state);
+  console.log("State updated to:", state);
   currentIndex = 0;
   label = "waiting...";
   toggleMenu(false);
   toggleLessonControls(true);
-  //drawState();
 }
 
 function toggleMenu(show) {
@@ -111,19 +152,21 @@ function closeLesson() {
   toggleLessonControls(false);
   toggleMenu(true);
 }
+
+//in der Endversion weg, wenn der Erkennungsalgo fehlerfreier ist
 function mousePressed() {
   if (state === "lektion1") {
-    currentIndex = (currentIndex + 1) % images1.length;
+    currentIndex = (currentIndex + 1) % media1.length;
   } else if (state === "lektion2") {
-    currentIndex = (currentIndex + 1) % images2.length;
+    currentIndex = (currentIndex + 1) % media2.length;
   }
 }
 
 function nextGesture() {
   if (state === "lektion1") {
-    currentIndex = (currentIndex + 1) % images1.length;
+    currentIndex = (currentIndex + 1) % media1.length;
   } else if (state === "lektion2") {
-    currentIndex = (currentIndex + 1) % images2.length;
+    currentIndex = (currentIndex + 1) % media2.length;
   }
   label = "waiting...";
   const nextButton = document.getElementById('next-button');
@@ -131,44 +174,69 @@ function nextGesture() {
   nextButton.setAttribute('disabled', true);
 }
 
-
-
-
 function drawState() {
+  let media, labels;
 
-    let images = state === "lektion1" ? images1 : images2;
-    let labels = state === "lektion1" ? labels1 : labels2;
+  if (state === "lektion1") {
+    media = media1;
+    labels = labels1;
+  } else if (state === "lektion2") {
+    media = media2;
+    labels = labels2;
+  }
 
-    // Zeige aktuelles Bild
-    image(images[currentIndex], 50, 100, 300, 200);
-    fill(0);
-    textSize(18);
-    textAlign(LEFT, TOP);
-   text(`${labels[currentIndex]}`, 50, 80);
+let current = media[currentIndex];
 
+    if (!current) {
+    console.error("Ungültiger Index oder kein Medium gefunden:", currentIndex);
+    return;
+  }
 
-    // Zeige Video
-    image(video, 300, 100, 320, 240);
+  //Quadrat für die Medien
+  const mediaSize = 240; // Größe des Quadrats
+  const mediaX = 50; // X-Position des Mediums
+  const mediaY = 100; // Y-Position des Mediums
 
-    // Feedback bei richtigem Label
-    if (labels[currentIndex] === label) {
-      fill(0, 255, 0, 100);
-      noStroke();
-      rect(300, 100, 320, 240);
-       const nextButton = document.getElementById('next-button');
-  nextButton.style.backgroundColor = 'green';
-   nextButton.removeAttribute('disabled');
-    }
+  // aktuelles Medium 
+  if (current.type === "image") {
+    image(current.media, mediaX, mediaY, mediaSize, mediaSize); 
+  } else if (current.type === "video") {
+    image(current.media, mediaX, mediaY, mediaSize, mediaSize); 
+    current.media.loop(); 
+  }
 
-    // Zeige erkannten Text
-    fill(0);
-    textSize(24);
-    textAlign(CENTER, CENTER);
-    text(label, 460, 380);
+  // Benutzer-Video 
+  const userVideoX = 300; // X-Position
+  const userVideoY = 100; // Y-Position
+  const userVideoWidth = 320; // Breite 
+  const userVideoHeight = 240; // Höhe 
+
+  image(video, userVideoX, userVideoY, userVideoWidth, userVideoHeight); 
+
+ 
+  if (labels[currentIndex] === label) {
+    fill(0, 255, 0, 100); // Grün
+    noStroke();
+    rect(userVideoX, userVideoY, userVideoWidth, userVideoHeight); // über das Benutzer-Video legen
+    document.getElementById('next-button').style.backgroundColor = 'green';
+ document.getElementById('next-button').removeAttribute('disabled'); 
+  }
+
+  // Label des aktuellen Mediums
+  fill(0);
+  textSize(24);
+  textAlign(CENTER, CENTER);
+  text(labels[currentIndex], mediaX + mediaSize / 2, mediaY - 20); //  oberhalb des Mediums
+
+  // erkannter Label
+  fill(0);
+  textSize(24);
+  textAlign(CENTER, CENTER);
+  text(label, userVideoX + userVideoWidth / 2, userVideoY + userVideoHeight + 30); //  unterhalb des Benutzer-Videos
 }
+
 function draw() {
   background(245, 245, 220);
-
 
   if (state === "lektion1" || state === "lektion2") {
     drawState();
