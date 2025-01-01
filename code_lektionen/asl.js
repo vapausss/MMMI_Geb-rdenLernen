@@ -76,8 +76,6 @@ function preload() {
 
 }
 
-//eventuell ab hier alle console.logs wegmachen, nur zum debuggen da 
-
 function setup() {
   createCanvas(800, 500);
   video = createCapture(VIDEO, { flipped: true });
@@ -174,6 +172,9 @@ function nextGesture() {
   nextButton.setAttribute('disabled', true);
 }
 
+let wordRecognized = false; 
+let progressCount = 1;
+
 function drawState() {
   let media, labels;
 
@@ -185,54 +186,95 @@ function drawState() {
     labels = labels2;
   }
 
-let current = media[currentIndex];
+  let current = media[currentIndex];
 
-    if (!current) {
+  if (!current) {
     console.error("Ungültiger Index oder kein Medium gefunden:", currentIndex);
     return;
   }
 
-  //Quadrat für die Medien
+  // Quadrat für die Medien
   const mediaSize = 240; // Größe des Quadrats
-  const mediaX = 50; // X-Position des Mediums
+  const mediaX = 70; // X-Position des Mediums 50
   const mediaY = 100; // Y-Position des Mediums
 
-  // aktuelles Medium 
+  // Aktuelles Medium anzeigen
   if (current.type === "image") {
-    image(current.media, mediaX, mediaY, mediaSize, mediaSize); 
+    image(current.media, mediaX, mediaY, mediaSize, mediaSize);
   } else if (current.type === "video") {
-    image(current.media, mediaX, mediaY, mediaSize, mediaSize); 
-    current.media.loop(); 
+    image(current.media, mediaX, mediaY, mediaSize, mediaSize);
+    current.media.loop();
   }
 
-  // Benutzer-Video 
-  const userVideoX = 300; // X-Position
+  // Benutzer-Video
+  const userVideoX = 350; // X-Position 340
   const userVideoY = 100; // Y-Position
-  const userVideoWidth = 320; // Breite 
-  const userVideoHeight = 240; // Höhe 
+  const userVideoWidth = 320; // Breite
+  const userVideoHeight = 240; // Höhe
 
-  image(video, userVideoX, userVideoY, userVideoWidth, userVideoHeight); 
+  image(video, userVideoX, userVideoY, userVideoWidth, userVideoHeight);
 
- 
+  // Überprüfung, ob das aktuelle Wort erkannt wurde
   if (labels[currentIndex] === label) {
-    fill(0, 255, 0, 100); // Grün
+    wordRecognized = true; // Zustand dauerhaft setzen
+  }
+
+  // Button-Aktivierung bei erfolgreicher Erkennung
+  const nextButton = document.getElementById('next-button');
+  if (wordRecognized) {
+    fill(0, 255, 0, 100); // Grün mit Transparenz
     noStroke();
-    rect(userVideoX, userVideoY, userVideoWidth, userVideoHeight); // über das Benutzer-Video legen
-    document.getElementById('next-button').style.backgroundColor = 'green';
- document.getElementById('next-button').removeAttribute('disabled'); 
+    rect(userVideoX, userVideoY, userVideoWidth, userVideoHeight); // Rechteck zeichnen
+
+    nextButton.style.backgroundColor = 'green';
+    nextButton.removeAttribute('disabled'); // Button aktivieren
+  } else {
+    nextButton.style.backgroundColor = 'gray';
+    nextButton.setAttribute('disabled', true); // Button deaktivieren
   }
 
   // Label des aktuellen Mediums
   fill(0);
   textSize(24);
   textAlign(CENTER, CENTER);
-  text(labels[currentIndex], mediaX + mediaSize / 2, mediaY - 20); //  oberhalb des Mediums
+  text(labels[currentIndex], mediaX + mediaSize / 2, mediaY - 20); // Oberhalb des Mediums anzeigen
 
-  // erkannter Label
+  // Erkannter Label
   fill(0);
   textSize(24);
   textAlign(CENTER, CENTER);
-  text(label, userVideoX + userVideoWidth / 2, userVideoY + userVideoHeight + 30); //  unterhalb des Benutzer-Videos
+  text(label, userVideoX + userVideoWidth / 2, userVideoY + userVideoHeight + 30); // Unterhalb des Benutzer-Videos anzeigen
+
+  // Fortschrittsanzeige in 2er-Schritten
+  let totalGestures = state === "lektion1" ? media1.length : media2.length;
+
+  // Anzeige des Fortschritts oben rechts
+  fill(0);
+  textSize(24);
+  textAlign(RIGHT, TOP);
+
+  // Hier erhöhen wir die Anzeige in 2er-Schritten
+  let progress = (progressCount > totalGestures) ? totalGestures : progressCount; // Maximalwert auf totalGestures begrenzen
+  text(`${progress} / ${totalGestures}`, width - 20, 20);
+}
+
+function nextGesture() {
+  // Button deaktivieren und Status zurücksetzen
+  wordRecognized = false; // Rücksetzen für das nächste Medium
+  currentIndex = (currentIndex + 1) % (state === "lektion1" ? media1.length : media2.length);
+
+  progressCount += 1; 
+
+  // Optional: Maximalwert auf die Gesamtanzahl der Gebärden begrenzen
+  if (progressCount > (state === "lektion1" ? media1.length : media2.length)) {
+    progressCount = state === "lektion1" ? media1.length : media2.length;
+  }
+
+  label = "waiting...";
+
+  const nextButton = document.getElementById('next-button');
+  nextButton.style.backgroundColor = 'gray';
+  nextButton.setAttribute('disabled', true); // Button deaktivieren
 }
 
 function draw() {
