@@ -7,14 +7,12 @@ let media2 = [];
 let labels1 = [];
 let labels2 = [];
 let currentIndex = 0;
-//let handPose;
-//let hands = [];
-let  state = "menu";
+let state = "menu";
 
 function preload() {
-  lektion1 = ml5.imageClassifier('https://teachablemachine.withgoogle.com/models/72sxPva99/', { flipped: true ,noCache: true});
-  lektion2 = ml5.imageClassifier('https://teachablemachine.withgoogle.com/models/lqng1X_Ep/', { flipped: true ,noCache: true});
-  // handPose = ml5.handPose({ flipped: true });
+  // Stelle sicher, dass die URLs korrekt sind und die Modelle geladen werden können
+  lektion1 = ml5.imageClassifier('https://teachablemachine.withgoogle.com/models/72sxPva99/model.json', { flipped: true ,noCache: true});
+  lektion2 = ml5.imageClassifier('https://teachablemachine.withgoogle.com/models/lqng1X_Ep/model.json', { flipped: true ,noCache: true});
 
   let filenames1 = [
     { type: "image", path: "a.jpg" },
@@ -44,7 +42,6 @@ function preload() {
     labels1.push(file.path.split('.')[0]); 
   }
 
- 
   let filenames2 = [
     { type: "image", path: "d.jpg" },
     { type: "image", path: "f.jpg" },
@@ -73,7 +70,6 @@ function preload() {
     }
     labels2.push(file.path.split('.')[0]); 
   }
-
 }
 
 function setup() {
@@ -81,32 +77,36 @@ function setup() {
   video = createCapture(VIDEO, { flipped: true });
   video.hide();
 
-  lektion1.classifyStart(video,gotResults);
-  lektion2.classifyStart(video,gotResults);
+  // Verwende die korrekte Methode 'classify'
+  lektion1.classifyStart(video, gotResults);
+  lektion2.classifyStart(video, gotResults);
 
+  document.getElementById('lektion1-button').addEventListener('click', function() {
+    console.log('Lektion 1 button clicked');
+    startLektion1();
+  });
 
-document.getElementById('lektion1-button').addEventListener('click', function() {
-  console.log('Lektion 1 button clicked');
-  startLektion1();
-});
+  document.getElementById('lektion2-button').addEventListener('click', function() {
+    console.log('Lektion 2 button clicked');
+    startLektion2();
+  });
 
-document.getElementById('lektion2-button').addEventListener('click', function() {
-  console.log('Lektion 2 button clicked');
-  startLektion2();
-});
+  document.getElementById('next-button').addEventListener('click', function() {
+    console.log('Next button clicked');
+    nextGesture();
+  });
 
-document.getElementById('next-button').addEventListener('click', function() {
-  console.log('Next button clicked');
-  nextGesture();
-});
-
-document.getElementById('close-button').addEventListener('click', function() {
-  console.log('Close button clicked');
-  closeLesson();
-});
+  document.getElementById('close-button').addEventListener('click', function() {
+    console.log('Close button clicked');
+    closeLesson();
+  });
 }
 
-function gotResults(results) {
+function gotResults(error, results) {
+  if (error) {
+    console.error(error);
+    return;
+  }
   if (results[0].confidence > 0.99) {
     label = results[0].label;
   } else {
@@ -117,7 +117,7 @@ function gotResults(results) {
 function startLektion1() {
   console.log("Starting Lektion 1");
   state = "lektion1";
-      console.log("State updated to:", state);
+  console.log("State updated to:", state);
   currentIndex = 0;
   label = "waiting...";
   toggleMenu(false);
@@ -126,7 +126,6 @@ function startLektion1() {
 
 function startLektion2() {
   console.log("Starting Lektion 2");
- 
   state = "lektion2";
   console.log("State updated to:", state);
   currentIndex = 0;
@@ -137,7 +136,7 @@ function startLektion2() {
 
 function toggleMenu(show) {
   console.log(`Toggling menu: ${show}`);
-  document.getElementById('menu').style.display = show ? "block" : "none";
+  document.getElementById('startseite').style.display = show ? "block" : "none";
 }
 
 function toggleLessonControls(show) {
@@ -151,7 +150,7 @@ function closeLesson() {
   toggleMenu(true);
 }
 
-//in der Endversion weg, wenn der Erkennungsalgo fehlerfreier ist
+// In der Endversion entfernen, wenn der Erkennungsalgo fehlerfreier ist
 function mousePressed() {
   if (state === "lektion1") {
     currentIndex = (currentIndex + 1) % media1.length;
@@ -161,15 +160,22 @@ function mousePressed() {
 }
 
 function nextGesture() {
-  if (state === "lektion1") {
-    currentIndex = (currentIndex + 1) % media1.length;
-  } else if (state === "lektion2") {
-    currentIndex = (currentIndex + 1) % media2.length;
+  // Button deaktivieren und Status zurücksetzen
+  wordRecognized = false; // Rücksetzen für das nächste Medium
+  currentIndex = (currentIndex + 1) % (state === "lektion1" ? media1.length : media2.length);
+
+  progressCount += 1; 
+
+  // Optional: Maximalwert auf die Gesamtanzahl der Gebärden begrenzen
+  if (progressCount > (state === "lektion1" ? media1.length : media2.length)) {
+    progressCount = state === "lektion1" ? media1.length : media2.length;
   }
+
   label = "waiting...";
+
   const nextButton = document.getElementById('next-button');
   nextButton.style.backgroundColor = 'gray';
-  nextButton.setAttribute('disabled', true);
+  nextButton.setAttribute('disabled', true); // Button deaktivieren
 }
 
 let wordRecognized = false; 
@@ -240,41 +246,13 @@ function drawState() {
   text(labels[currentIndex], mediaX + mediaSize / 2, mediaY - 20); // Oberhalb des Mediums anzeigen
 
   // Erkannter Label
-  fill(0);
-  textSize(24);
-  textAlign(CENTER, CENTER);
   text(label, userVideoX + userVideoWidth / 2, userVideoY + userVideoHeight + 30); // Unterhalb des Benutzer-Videos anzeigen
 
   // Fortschrittsanzeige in 2er-Schritten
   let totalGestures = state === "lektion1" ? media1.length : media2.length;
 
   // Anzeige des Fortschritts oben rechts
-  fill(0);
-  textSize(24);
-  textAlign(RIGHT, TOP);
-
-  // Hier erhöhen wir die Anzeige in 2er-Schritten
-  let progress = (progressCount > totalGestures) ? totalGestures : progressCount; // Maximalwert auf totalGestures begrenzen
-  text(`${progress} / ${totalGestures}`, width - 20, 20);
-}
-
-function nextGesture() {
-  // Button deaktivieren und Status zurücksetzen
-  wordRecognized = false; // Rücksetzen für das nächste Medium
-  currentIndex = (currentIndex + 1) % (state === "lektion1" ? media1.length : media2.length);
-
-  progressCount += 1; 
-
-  // Optional: Maximalwert auf die Gesamtanzahl der Gebärden begrenzen
-  if (progressCount > (state === "lektion1" ? media1.length : media2.length)) {
-    progressCount = state === "lektion1" ? media1.length : media2.length;
-  }
-
-  label = "waiting...";
-
-  const nextButton = document.getElementById('next-button');
-  nextButton.style.backgroundColor = 'gray';
-  nextButton.setAttribute('disabled', true); // Button deaktivieren
+  text(`${progressCount} / ${totalGestures}`, width - 20, 20);
 }
 
 function draw() {
@@ -282,11 +260,5 @@ function draw() {
 
   if (state === "lektion1" || state === "lektion2") {
     drawState();
-  }
-    else  {
-    textAlign(CENTER, CENTER);
-    textSize(32);
-    fill(0);
-    text("Wähle eine Lektion", width / 2, height / 2 - 50);
   }
 }
